@@ -1,0 +1,40 @@
+name:                 hsrandom123
+version:              0.1
+license:              BSD3
+license-file:         LICENSE
+author:               Andres Löh
+maintainer:           andres@well-typed.com
+stability:            experimental
+build-type:           Simple
+cabal-version:        >= 1.8
+extra-source-files:   src/include/*.h
+                      src/include/features/*.h
+synopsis:             Counter-based Random Number Generators in Haskell
+description:          This library contains pure Haskell implementations of the counter-based random-number
+                      generators /Philox/ and /Threefry/ as described in the paper
+                      .
+                         John K. Salmon, Mark A. Moraes, Ron O. Dror, and David E. Shaw.
+                         /Parallel Random Numbers: As Easy as 1, 2, 3./
+                         Proceedings of 2011 International Conference for High Performance Computing, Networking, Storage and Analysis (SC '11).
+                         ACM, New York, NY, USA. 2011.
+                      .
+                      The Philox and Threefry random number generators only use a counter as their state. As
+                      such, they are easy to use in both parallel and distributed settings. They fare well in
+                      classic PRNG tests such as Dieharder and Crush, however they are not suitable for use in
+                      cryptography or security.
+
+library
+  hs-source-dirs:     src
+  exposed-modules:    System.Random.Philox
+                      System.Random.Threefry
+  other-modules:      System.Random.HsRandom123.Utils
+  build-depends:      base >= 3 && < 6,
+                      array,
+                      deepseq,
+                      primitive
+  ghc-options:        -O2
+  -- ghc-options:        -Wall
+  -- ghc-options:        -funbox-strict-fields
+  -- ghc-options:        -Odph -fno-liberate-case -funfolding-use-threshold1000 -funfolding-keeness-factor1000
+  -- ghc-options:        -Odph -fllvm -optlo-O3
+  -- ghc-options:        -Odph
