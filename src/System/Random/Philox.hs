@@ -223,12 +223,15 @@ instance PhiloxN N4 where
                               (hi0 `xor` ctr3 `xor` key1) lo0
   {-# INLINE pR #-}
 
+-- | The state of a Philox RNG.
 data PhiloxData n w = P !(PhiloxCtr n w) !(PhiloxKey n w)
 
+-- | Initialize a Philox RNG with a counter and a key.
 init :: PhiloxCtr n w -> PhiloxKey n w -> PhiloxData n w
 init = P
 {-# INLINE init #-}
 
+-- | Increment the counter.
 inc :: (Philox n w) => PhiloxData n w -> PhiloxData n w
 inc (P ctr key) = P (incr ctr) key
 {-# INLINE inc #-}
@@ -253,14 +256,20 @@ philoxCycle :: (Philox n w) => PhiloxData n w -> PhiloxData n w
 philoxCycle (P ctr key) = P (philoxRound ctr key) (bumpKey key)
 {-# INLINE philoxCycle #-}
 
+-- | Get the current random data.
 get :: (Philox n w) => PhiloxData n w -> A n w
 get pd = rounds1 (Rounds :: Rounds R10) pd
 {-# INLINE get #-}
 
+-- | Get the current random data and increment the counter.
 step :: (Philox n w) => PhiloxData n w -> (A n w, PhiloxData n w)
 step rng = (get rng, inc rng)
+{-# INLINE step #-}
 
 data PhiloxState s n w = PS {-# UNPACK #-} !(MutVar s DoubleList) {-# UNPACK #-} !(MutVar s (PhiloxData n w))
+
+type PhiloxStateIO   = PhiloxState (PrimState IO)
+type PhiloxStateST s = PhiloxState (PrimState (ST s))
 
 new :: (PrimMonad m, Philox n w) => A n w -> A (Half n) w -> m (PhiloxState (PrimState m) n w)
 new ctr key = do
@@ -291,6 +300,9 @@ uniform (PS svd ph) = do
 {-# SPECIALIZE uniform :: PhiloxState s         N4 W64 -> ST s Double #-}
 
 newtype PhiloxStateRaw s n w = PSR (MutVar s (PhiloxData n w))
+
+type PhiloxStateRawIO   = PhiloxStateRaw (PrimState IO)
+type PhiloxStateRawST s = PhiloxStateRaw (PrimState (ST s))
 
 newRaw :: (PrimMonad m, Philox n w) => A n w -> A (Half n) w -> m (PhiloxStateRaw (PrimState m) n w)
 newRaw ctr key = do

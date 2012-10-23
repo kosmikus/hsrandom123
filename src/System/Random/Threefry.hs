@@ -562,6 +562,7 @@ instance (ThreefryR R31 N4 w) => ThreefryR R32 N4 w where
     in k (mkA (Proxy :: Proxy N4 w) z0 z1 z2 z3)
   {-# INLINE threefryR #-}
 
+-- | The state of a Threefry RNG.
 data ThreefryData n w = T !(ThreefryCtr n w) !(ThreefryKey n w)
 
 class (Counter n, ToDoubles n w, WithA n w, ThreefryW w, ThreefryN n, ThreefryRot n w) => Threefry n w where
@@ -618,22 +619,30 @@ instance Threefry N4 W64 where
 
 type RD = R20
 
+-- | Initialize a Threefry RNG with a counter and a key.
 init :: ThreefryCtr n w -> ThreefryKey n w -> ThreefryData n w
 init = T
 {-# INLINE init #-}
 
+-- | Increment the counter.
 inc :: (Threefry n w) => ThreefryData n w -> ThreefryData n w
 inc (T ctr key) = T (incr ctr) key
 {-# INLINE inc #-}
 
+-- | Get the current random data.
 get :: (Threefry n w, ThreefryR RD n w) => ThreefryData n w -> A n w
 get (T ctr key) = threefry (Rounds :: Rounds RD) ctr key
 {-# INLINE get #-}
 
+-- | Get the current random data and increment the counter.
 step :: (Threefry n w, ThreefryR RD n w) => ThreefryData n w -> (A n w, ThreefryData n w)
 step rng = (get rng, inc rng)
+{-# INLINE step #-}
 
 data ThreefryState s n w = TS {-# UNPACK #-} !(MutVar s DoubleList) {-# UNPACK #-} !(MutVar s (ThreefryData n w))
+
+type ThreefryStateIO   = ThreefryState (PrimState IO)
+type ThreefryStateST s = ThreefryState (PrimState (ST s))
 
 new :: (PrimMonad m, Threefry n w) => A n w -> A n w -> m (ThreefryState (PrimState m) n w)
 new ctr key = do
@@ -664,6 +673,9 @@ uniform (TS svd ph) = do
 {-# SPECIALIZE uniform :: ThreefryState s         N4 W64 -> ST s Double #-}
 
 newtype ThreefryStateRaw s n w = TSR (MutVar s (ThreefryData n w))
+
+type ThreefryStateRawIO   = ThreefryStateRaw (PrimState IO)
+type ThreefryStateRawST s = ThreefryStateRaw (PrimState (ST s))
 
 newRaw :: (PrimMonad m, Threefry n w) => A n w -> A n w -> m (ThreefryStateRaw (PrimState m) n w)
 newRaw ctr key = do
