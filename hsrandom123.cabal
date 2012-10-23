@@ -9,6 +9,7 @@ build-type:           Simple
 cabal-version:        >= 1.8
 extra-source-files:   src/include/*.h
                       src/include/features/*.h
+category:             Math
 synopsis:             Counter-based Random Number Generators in Haskell
 description:          This library contains pure Haskell implementations of the counter-based random-number
                       generators /Philox/ and /Threefry/ as described in the paper
@@ -23,6 +24,10 @@ description:          This library contains pure Haskell implementations of the 
                       classic PRNG tests such as Dieharder and Crush, however they are not suitable for use in
                       cryptography or security.
 
+source-repository head
+  type:               git
+  location:           https://github.com/kosmikus/hsrandom123
+
 library
   hs-source-dirs:     src
   exposed-modules:    System.Random.Philox
@@ -32,9 +37,6 @@ library
                       array,
                       deepseq,
                       primitive
-  ghc-options:        -O2
+  -- ghc-options:        -O2
   -- ghc-options:        -Wall
-  -- ghc-options:        -funbox-strict-fields
   -- ghc-options:        -Odph -fno-liberate-case -funfolding-use-threshold1000 -funfolding-keeness-factor1000
-  -- ghc-options:        -Odph -fllvm -optlo-O3
-  -- ghc-options:        -Odph
