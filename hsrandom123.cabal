@@ -40,3 +40,16 @@ library
   -- ghc-options:        -O2
   -- ghc-options:        -Wall
   -- ghc-options:        -Odph -fno-liberate-case -funfolding-use-threshold1000 -funfolding-keeness-factor1000
+
+benchmark hsrandom123-bench
+  type:               exitcode-stdio-1.0
+  hs-source-dirs:     bench
+  main-is:            HsRandom123Bench.hs
+  build-depends:      base >= 3.0 && < 5,
+                      hsrandom123,
+                      criterion,
+                      mwc-random,
+                      primitive
+  -- ghc-options:        -O2
+  -- ghc-options:        -Wall
+  -- ghc-options:        -Odph -fno-liberate-case -funfolding-use-threshold1000 -funfolding-keeness-factor1000
