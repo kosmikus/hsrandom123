@@ -45,7 +45,6 @@ rotL32 x n = shiftL x (fromIntegral (n .&. 31)) .|. shiftR x (fromIntegral ((32 
 
 type ThreefryCtr  n w = A n w
 type ThreefryKey  n w = A n w
-type ThreefryUKey n w = A n w
 
 class (ThreefryW w) => ThreefryRot n w where
   rot0 :: Rot n w
