@@ -42,7 +42,9 @@ type family Cont (n :: Nx) (w :: Wd) (r :: *) :: *
 
 -- | The type 'W w' represents a word of width 'w'.
 type family W (w :: Wd) :: *
-data Width (w :: Wd) = Width
+-- | Inverse of 'W'.
+type family UnW (w :: *) :: Wd
+
 data Rounds (r :: Nat) = Rounds
 
 #else
@@ -91,8 +93,9 @@ type family Cont n w r :: *
 
 -- | The datatype 'W w' represents a word of width 'w'.
 type family W w :: *
+-- | Inverse of 'W'.
+type family UnW w :: *
 
-data Width w = Width
 data Rounds r = Rounds
 
 #endif
@@ -310,6 +313,11 @@ type instance W WN  = Word
 type instance W W8  = Word8
 type instance W W32 = Word32
 type instance W W64 = Word64
+
+type instance UnW Word   = WN
+type instance UnW Word8  = W8
+type instance UnW Word32 = W32
+type instance UnW Word64 = W64
 
 -- type-level integer literals
 type R0 = Z

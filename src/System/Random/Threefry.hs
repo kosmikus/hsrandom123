@@ -19,20 +19,20 @@ import Data.Word
 import Prelude hiding (init)
 import System.Random.HsRandom123.Utils
 
-class ThreefryW w where
-  rotL :: Width w -> W w -> Word8 -> W w
-  parity :: Width w -> W w
+class (UnW (W w) ~ w) => ThreefryW w where
+  rotL   :: W w -> Word8 -> W w
+  parity :: W w
 
 instance ThreefryW W64 where
-  rotL _ = rotL64
+  rotL   = rotL64
   {-# INLINE rotL #-}
-  parity _ = 0x1BD11BDAA9FC1A22
+  parity = 0x1BD11BDAA9FC1A22
   {-# INLINE parity #-}
 
 instance ThreefryW W32 where
-  rotL _ = rotL32
+  rotL   = rotL32
   {-# INLINE rotL #-}
-  parity _ = 0x1BD11BDA
+  parity = 0x1BD11BDA
   {-# INLINE parity #-}
 
 rotL64 :: Word64 -> Word8 -> Word64
@@ -134,13 +134,13 @@ class ThreefryN n where
 instance ThreefryN N2 where
   threefry r (x :: ThreefryCtr N2 w) ks =
     withA ks $ \ ks0 ks1 ->
-    threefryR r x ks (parity (Width :: Width w) `xor` ks0 `xor` ks1) id
+    threefryR r x ks (parity `xor` ks0 `xor` ks1) id
   {-# INLINE threefry #-}
 
 instance ThreefryN N4 where
   threefry r (x :: ThreefryCtr N4 w) ks =
     withA ks $ \ ks0 ks1 ks2 ks3 ->
-    threefryR r x ks (parity (Width :: Width w) `xor` ks0 `xor` ks1 `xor` ks2 `xor` ks3) id
+    threefryR r x ks (parity `xor` ks0 `xor` ks1 `xor` ks2 `xor` ks3) id
   {-# INLINE threefry #-}
 
 class (Threefry n w) => ThreefryR r n w where
@@ -174,7 +174,7 @@ stdRot2 rot _ x ks ks2 k = threefryR (Rounds :: Rounds r) x ks ks2 $ \ x' ->
   withA x' $ \ x0 x1 ->
   withRot rot $ \ r ->
     let !y0 = x0 + x1
-        !y1 = rotL (Width :: Width w) x1 r `xor` y0
+        !y1 = rotL x1 r `xor` y0
     in k (mkA y0 y1)
 {-# INLINE stdRot2 #-}
 
@@ -185,9 +185,9 @@ stdRot4_0 rot _ x ks ks4 k = threefryR (Rounds :: Rounds r) x ks ks4 $ \ x' ->
   withA x' $ \ x0 x1 x2 x3 ->
   withRot rot $ \ r0 r1 ->
     let !y0 = x0 + x1
-        !y1 = rotL (Width :: Width w) x1 r0 `xor` y0
+        !y1 = rotL x1 r0 `xor` y0
         !y2 = x2 + x3
-        !y3 = rotL (Width :: Width w) x3 r1 `xor` y2
+        !y3 = rotL x3 r1 `xor` y2
     in k (mkA y0 y1 y2 y3)
 {-# INLINE stdRot4_0 #-}
 
@@ -198,9 +198,9 @@ stdRot4_1 rot _ x ks ks4 k = threefryR (Rounds :: Rounds r) x ks ks4 $ \ x' ->
   withA x' $ \ x0 x1 x2 x3 ->
   withRot rot $ \ r0 r1 ->
     let !y0 = x0 + x3
-        !y3 = rotL (Width :: Width w) x3 r0 `xor` y0
+        !y3 = rotL x3 r0 `xor` y0
         !y2 = x2 + x1
-        !y1 = rotL (Width :: Width w) x1 r1 `xor` y2
+        !y1 = rotL x1 r1 `xor` y2
     in k (mkA y0 y1 y2 y3)
 {-# INLINE stdRot4_1 #-}
 
