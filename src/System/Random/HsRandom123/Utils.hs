@@ -23,6 +23,7 @@ data Wd = WN | W8 | W32 | W64
 data Nat = Z | S Nat
 
 type family Half (n :: Nx) :: Nx
+type family Dbl (n :: Nx) :: Nx
 data family A (n :: Nx) (w :: Wd) :: *
 newtype Rot n (w :: Wd) = Rot (A (Half n) W8)
 type family Cont (n :: Nx) (w :: Wd) (r :: *) :: *
@@ -52,6 +53,7 @@ data Z
 data S n
 
 type family Half n :: *
+type family Dbl n :: *
 data family A n w :: *
 newtype Rot n w = Rot (A (Half n) W8)
 type family Cont n w r :: *
@@ -67,6 +69,9 @@ data Rounds r = Rounds
 
 type instance Half N2 = N1
 type instance Half N4 = N2
+
+type instance Dbl N1 = N2
+type instance Dbl N2 = N4
 
 newtype instance A N1 WN  = A1x   Word
 newtype instance A N1 W8  = A1x8  Word8
@@ -93,8 +98,6 @@ instance NFData (A N4 WN)
 instance NFData (A N4 W8)
 instance NFData (A N4 W32)
 instance NFData (A N4 W64)
-
-newtype A2 n w = A2 (A (Half n) w)
 
 type instance Cont N1 w r = W w -> r
 type instance Cont N2 w r = W w -> W w -> r
@@ -175,9 +178,6 @@ instance WithA N4 W64 where
   {-# INLINE withA #-}
   mkA _                       = A4x64
   {-# INLINE mkA #-}
-
-withA2 :: (WithA (Half n) w) => A2 n w -> Cont (Half n) w r -> r
-withA2 (A2 a) = withA a
 
 withRot :: (WithA (Half n) W8) => Rot n w -> Cont (Half n) W8 r -> r
 withRot (Rot a) = withA a

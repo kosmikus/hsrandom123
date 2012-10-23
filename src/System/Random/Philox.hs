@@ -99,20 +99,20 @@ instance PhiloxW W64 where
 #endif
 
 type PhiloxCtr n w = A n w
-type PhiloxKey n w = A2 n w
+type PhiloxKey n w = A (Half n) w
 
-class (PhiloxW w, PhiloxN n, WithA n w, WithA (Half n) w, ToDoubles n w) => Philox n w where
-  multipliers :: A2 n w
-  bumpers     :: A2 n w
+class (PhiloxW w, PhiloxN n, WithA n w, WithA (Half n) w, ToDoubles n w, Dbl (Half n) ~ n) => Philox n w where
+  multipliers :: A (Half n) w
+  bumpers     :: A (Half n) w
   philoxRound :: PhiloxCtr n w -> PhiloxKey n w -> PhiloxCtr n w
   bumpKey     :: PhiloxKey n w -> PhiloxKey n w
   stream      :: PhiloxCtr n w -> PhiloxKey n w -> [W w]
   ustream     :: PhiloxCtr n w -> PhiloxKey n w -> [Double]
 
 instance Philox N2 W64 where
-  multipliers = A2 $ A1x64 0xD2B74407B1CE6E93
+  multipliers = A1x64 0xD2B74407B1CE6E93
   {-# INLINE multipliers #-}
-  bumpers     = A2 $ A1x64 0x9E3779B97F4A7C15
+  bumpers     = A1x64 0x9E3779B97F4A7C15
   {-# INLINE bumpers #-}
   philoxRound = pR
   {-# INLINE philoxRound #-}
@@ -130,9 +130,9 @@ instance Philox N2 W64 where
   {-# INLINE ustream #-}
 
 instance Philox N4 W64 where
-  multipliers = A2 $ A2x64 0xD2E7470EE14C6C93 0xCA5A826395121157
+  multipliers = A2x64 0xD2E7470EE14C6C93 0xCA5A826395121157
   {-# INLINE multipliers #-}
-  bumpers     = A2 $ A2x64 0x9E3779B97F4A7C15 0xBB67AE8584CAA73B
+  bumpers     = A2x64 0x9E3779B97F4A7C15 0xBB67AE8584CAA73B
   {-# INLINE bumpers #-}
   philoxRound = pR
   {-# INLINE philoxRound #-}
@@ -150,9 +150,9 @@ instance Philox N4 W64 where
   {-# INLINE ustream #-}
 
 instance Philox N2 W32 where
-  multipliers = A2 $ A1x32 0xD256D193
+  multipliers = A1x32 0xD256D193
   {-# INLINE multipliers #-}
-  bumpers     = A2 $ A1x32 0x9E3779B9
+  bumpers     = A1x32 0x9E3779B9
   {-# INLINE bumpers #-}
   philoxRound = pR
   {-# INLINE philoxRound #-}
@@ -170,9 +170,9 @@ instance Philox N2 W32 where
   {-# INLINE ustream #-}
 
 instance Philox N4 W32 where
-  multipliers = A2 $ A2x32 0xD2511F53 0xCD9E8D57
+  multipliers = A2x32 0xD2511F53 0xCD9E8D57
   {-# INLINE multipliers #-}
-  bumpers     = A2 $ A2x32 0x9E3779B9 0xBB67AE85
+  bumpers     = A2x32 0x9E3779B9 0xBB67AE85
   {-# INLINE bumpers #-}
   philoxRound = pR
   {-# INLINE philoxRound #-}
@@ -190,33 +190,33 @@ instance Philox N4 W32 where
   {-# INLINE ustream #-}
 
 class Counter n => PhiloxN n where
-  bk   :: forall w . (Philox n w) => A2 n w -> A2 n w
-  pR   :: forall w . (Philox n w) => A n w -> A2 n w -> A n w
+  bk   :: forall w . (Philox n w) => A (Half n) w -> A (Half n) w
+  pR   :: forall w . (Philox n w) => A n w -> A (Half n) w -> A n w
 
 instance PhiloxN N2 where
-  bk (key :: A2 N2 w) =
-    withA2 key $ \ key0 ->
-    withA2 (bumpers :: A2 N2 w) $ \ w0 ->
-    A2 (mkA (Proxy :: Proxy N1 w) (key0 + w0))
+  bk (key :: A N1 w) =
+    withA key $ \ key0 ->
+    withA (bumpers :: A N1 w) $ \ w0 ->
+    mkA (Proxy :: Proxy N1 w) (key0 + w0)
   {-# INLINE bk #-}
   pR (ctr :: A N2 w) key =
     withA ctr $ \ ctr0 ctr1 ->
-    withA2 key $ \ key0 ->
-    withA2 (multipliers :: A2 N2 w) $ \ m0 ->
+    withA key $ \ key0 ->
+    withA (multipliers :: A N1 w) $ \ m0 ->
     withA (mulhilo m0 ctr0 :: A N2 w) $ \ lo0 hi0 ->
     mkA (Proxy :: Proxy N2 w) (hi0 `xor` ctr1 `xor` key0) lo0
   {-# INLINE pR #-}
 
 instance PhiloxN N4 where
-  bk (key :: A2 N4 w) =
-    withA2 key $ \ key0 key1 ->
-    withA2 (bumpers :: A2 N4 w) $ \ w0 w1 ->
-    A2 (mkA (Proxy :: Proxy N2 w) (key0 + w0) (key1 + w1))
+  bk (key :: A N2 w) =
+    withA key $ \ key0 key1 ->
+    withA (bumpers :: A N2 w) $ \ w0 w1 ->
+    mkA (Proxy :: Proxy N2 w) (key0 + w0) (key1 + w1)
   {-# INLINE bk #-}
   pR (ctr :: A N4 w) key =
     withA ctr $ \ ctr0 ctr1 ctr2 ctr3 ->
-    withA2 key $ \ key0 key1 ->
-    withA2 (multipliers :: A2 N4 w) $ \ m0 m1 ->
+    withA key $ \ key0 key1 ->
+    withA (multipliers :: A N2 w) $ \ m0 m1 ->
     withA (mulhilo m0 ctr0 :: A N2 w) $ \ lo0 hi0 ->
     withA (mulhilo m1 ctr2 :: A N2 w) $ \ lo1 hi1 ->
     mkA (Proxy :: Proxy N4 w) (hi1 `xor` ctr1 `xor` key0) lo1
@@ -274,7 +274,7 @@ type PhiloxStateST s = PhiloxState (PrimState (ST s))
 new :: (PrimMonad m, Philox n w) => A n w -> A (Half n) w -> m (PhiloxState (PrimState m) n w)
 new ctr key = do
   svd <- newMutVar DoubleNil
-  ph  <- newMutVar (init ctr (A2 key))
+  ph  <- newMutVar (init ctr key)
   return (PS svd ph)
 
 uniform :: (PrimMonad m, Philox n w, PrimState m ~ s) => PhiloxState s n w -> m Double
@@ -306,7 +306,7 @@ type PhiloxStateRawST s = PhiloxStateRaw (PrimState (ST s))
 
 newRaw :: (PrimMonad m, Philox n w) => A n w -> A (Half n) w -> m (PhiloxStateRaw (PrimState m) n w)
 newRaw ctr key = do
-  ph <- newMutVar (init ctr (A2 key))
+  ph <- newMutVar (init ctr key)
   return (PSR ph)
 
 nextRaw :: (PrimMonad m, Philox n w, PrimState m ~ s) => PhiloxStateRaw s n w -> m (A n w)
