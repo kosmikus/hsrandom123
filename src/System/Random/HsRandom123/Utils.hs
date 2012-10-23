@@ -31,7 +31,6 @@ type family W (w :: Wd) :: *
 type family Mod8 (n :: Nat) :: Nat
 type family Div4 (n :: Nat) :: Nat
 
-data Proxy (n :: Nx) (w :: Wd) = Proxy
 data Width (w :: Wd) = Width
 data Rounds (r :: Nat) = Rounds
 
@@ -61,11 +60,12 @@ type family W w :: *
 type family Mod8 n :: *
 type family Div4 n :: *
 
-data Proxy n w = Proxy
 data Width w = Width
 data Rounds r = Rounds
 
 #endif
+
+type family UnCont (t :: *) :: *
 
 type instance Half N2 = N1
 type instance Half N4 = N2
@@ -103,80 +103,83 @@ type instance Cont N1 w r = W w -> r
 type instance Cont N2 w r = W w -> W w -> r
 type instance Cont N4 w r = W w -> W w -> W w -> W w -> r
 
+type instance UnCont (A n w)  = A n w
+type instance UnCont (a -> r) = UnCont r
+
 class (Bits (W w), Num (W w), Eq (W w)) => WithA n w where
   withA :: A n w -> Cont n w r -> r
-  mkA   :: Proxy n w -> Cont n w (A n w)
+  mkA   :: (UnCont r ~ A n w, Cont n w (A n w) ~ r) => r
 
 instance WithA N1 WN where
   withA (A1x x0) k = k x0
   {-# INLINE withA #-}
-  mkA _            = A1x
+  mkA              = A1x
   {-# INLINE mkA #-}
 
 instance WithA N1 W8  where
   withA (A1x8 x0) k = k x0
   {-# INLINE withA #-}
-  mkA _             = A1x8
+  mkA               = A1x8
   {-# INLINE mkA #-}
 
 instance WithA N1 W32 where
   withA (A1x32 x0) k = k x0
   {-# INLINE withA #-}
-  mkA _              = A1x32
+  mkA                = A1x32
   {-# INLINE mkA #-}
 
 instance WithA N1 W64 where
   withA (A1x64 x0) k = k x0
   {-# INLINE withA #-}
-  mkA _              = A1x64
+  mkA                = A1x64
   {-# INLINE mkA #-}
 
 instance WithA N2 WN where
   withA (A2x x0 x1) k = k x0 x1
   {-# INLINE withA #-}
-  mkA _               = A2x
+  mkA                 = A2x
   {-# INLINE mkA #-}
 
 instance WithA N2 W8 where
   withA (A2x8 x0 x1) k = k x0 x1
   {-# INLINE withA #-}
-  mkA _                = A2x8
+  mkA                  = A2x8
   {-# INLINE mkA #-}
 
 instance WithA N2 W32 where
   withA (A2x32 x0 x1) k = k x0 x1
   {-# INLINE withA #-}
-  mkA _                 = A2x32
+  mkA                   = A2x32
   {-# INLINE mkA #-}
 
 instance WithA N2 W64 where
   withA (A2x64 x0 x1) k = k x0 x1
   {-# INLINE withA #-}
-  mkA _                 = A2x64
+  mkA                   = A2x64
   {-# INLINE mkA #-}
 
 instance WithA N4 WN where
   withA (A4x x0 x1 x2 x3) k = k x0 x1 x2 x3
   {-# INLINE withA #-}
-  mkA _                     = A4x
+  mkA                       = A4x
   {-# INLINE mkA #-}
 
 instance WithA N4 W8 where
   withA (A4x8 x0 x1 x2 x3) k = k x0 x1 x2 x3
   {-# INLINE withA #-}
-  mkA _                      = A4x8
+  mkA                        = A4x8
   {-# INLINE mkA #-}
 
 instance WithA N4 W32 where
   withA (A4x32 x0 x1 x2 x3) k = k x0 x1 x2 x3
   {-# INLINE withA #-}
-  mkA _                       = A4x32
+  mkA                         = A4x32
   {-# INLINE mkA #-}
 
 instance WithA N4 W64 where
   withA (A4x64 x0 x1 x2 x3) k = k x0 x1 x2 x3
   {-# INLINE withA #-}
-  mkA _                       = A4x64
+  mkA                         = A4x64
   {-# INLINE mkA #-}
 
 withRot :: (WithA (Half n) W8) => Rot n w -> Cont (Half n) W8 r -> r
@@ -241,34 +244,34 @@ class Counter n where
   incr :: forall w . (WithA n w) => A n w -> A n w
 
 instance Counter N1 where
-  zero = mkA (Proxy :: Proxy N1 w) 0
+  zero = mkA 0
   {-# INLINE zero #-}
   incr (c :: A N1 w) =
-    withA c $ \ c0 -> mkA (Proxy :: Proxy N1 w) (c0 + 1)
+    withA c $ \ c0 -> mkA (c0 + 1)
   {-# INLINE incr #-}
 
 instance Counter N2 where
-  zero = mkA (Proxy :: Proxy N2 w) 0 0
+  zero = mkA 0 0
   {-# INLINE zero #-}
   incr (c :: A N2 w) =
     withA c $ \ c0 c1 ->
     case c1 + 1 of
-      0 -> mkA (Proxy :: Proxy N2 w) (c0 + 1) 0
-      n -> mkA (Proxy :: Proxy N2 w) c0 n
+      0 -> mkA (c0 + 1) 0
+      n -> mkA c0 n
   {-# INLINE incr #-}
 
 instance Counter N4 where
-  zero = mkA (Proxy :: Proxy N4 w) 0 0 0 0
+  zero = mkA 0 0 0 0
   {-# INLINE zero #-}
   incr (c :: A N4 w) =
     withA c $ \ c0 c1 c2 c3 ->
     case c3 + 1 of
       0 -> case c2 + 1 of
              0 -> case c1 + 1 of
-                    0 -> mkA (Proxy :: Proxy N4 w) (c0 + 1) 0 0 0
-                    n -> mkA (Proxy :: Proxy N4 w) c0 n 0 0
-             n -> mkA (Proxy :: Proxy N4 w) c0 c1 n 0
-      n -> mkA (Proxy :: Proxy N4 w) c0 c1 c2 n
+                    0 -> mkA (c0 + 1) 0 0 0
+                    n -> mkA c0 n 0 0
+             n -> mkA c0 c1 n 0
+      n -> mkA c0 c1 c2 n
   {-# INLINE incr #-}
 
 type instance W WN  = Word

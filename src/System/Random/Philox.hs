@@ -197,21 +197,21 @@ instance PhiloxN N2 where
   bk (key :: A N1 w) =
     withA key $ \ key0 ->
     withA (bumpers :: A N1 w) $ \ w0 ->
-    mkA (Proxy :: Proxy N1 w) (key0 + w0)
+    mkA (key0 + w0)
   {-# INLINE bk #-}
   pR (ctr :: A N2 w) key =
     withA ctr $ \ ctr0 ctr1 ->
     withA key $ \ key0 ->
     withA (multipliers :: A N1 w) $ \ m0 ->
     withA (mulhilo m0 ctr0 :: A N2 w) $ \ lo0 hi0 ->
-    mkA (Proxy :: Proxy N2 w) (hi0 `xor` ctr1 `xor` key0) lo0
+    mkA (hi0 `xor` ctr1 `xor` key0) lo0
   {-# INLINE pR #-}
 
 instance PhiloxN N4 where
   bk (key :: A N2 w) =
     withA key $ \ key0 key1 ->
     withA (bumpers :: A N2 w) $ \ w0 w1 ->
-    mkA (Proxy :: Proxy N2 w) (key0 + w0) (key1 + w1)
+    mkA (key0 + w0) (key1 + w1)
   {-# INLINE bk #-}
   pR (ctr :: A N4 w) key =
     withA ctr $ \ ctr0 ctr1 ctr2 ctr3 ->
@@ -219,7 +219,7 @@ instance PhiloxN N4 where
     withA (multipliers :: A N2 w) $ \ m0 m1 ->
     withA (mulhilo m0 ctr0 :: A N2 w) $ \ lo0 hi0 ->
     withA (mulhilo m1 ctr2 :: A N2 w) $ \ lo1 hi1 ->
-    mkA (Proxy :: Proxy N4 w) (hi1 `xor` ctr1 `xor` key0) lo1
+    mkA (hi1 `xor` ctr1 `xor` key0) lo1
                               (hi0 `xor` ctr3 `xor` key1) lo0
   {-# INLINE pR #-}
 

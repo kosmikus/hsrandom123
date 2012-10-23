@@ -153,7 +153,7 @@ instance (Threefry N2 w) => ThreefryR R0 N2 w where
     withA ks $ \ ks0 ks1 ->
     let !y0 = x0 + ks0
         !y1 = x1 + ks1
-    in k (mkA (Proxy :: Proxy N2 w) y0 y1)
+    in k (mkA y0 y1)
   {-# INLINE threefryR #-}
 
 instance (Threefry N4 w) => ThreefryR R0 N4 w where
@@ -164,7 +164,7 @@ instance (Threefry N4 w) => ThreefryR R0 N4 w where
         !y1 = x1 + ks1
         !y2 = x2 + ks2
         !y3 = x3 + ks3
-    in k (mkA (Proxy :: Proxy N4 w) y0 y1 y2 y3)
+    in k (mkA y0 y1 y2 y3)
   {-# INLINE threefryR #-}
 
 stdRot2 :: forall w r s . (ThreefryR r N2 w) =>
@@ -175,7 +175,7 @@ stdRot2 rot _ x ks ks2 k = threefryR (Rounds :: Rounds r) x ks ks2 $ \ x' ->
   withRot rot $ \ r ->
     let !y0 = x0 + x1
         !y1 = rotL (Width :: Width w) x1 r `xor` y0
-    in k (mkA (Proxy :: Proxy N2 w) y0 y1)
+    in k (mkA y0 y1)
 {-# INLINE stdRot2 #-}
 
 stdRot4_0 :: forall w r s . (ThreefryR r N4 w) =>
@@ -188,7 +188,7 @@ stdRot4_0 rot _ x ks ks4 k = threefryR (Rounds :: Rounds r) x ks ks4 $ \ x' ->
         !y1 = rotL (Width :: Width w) x1 r0 `xor` y0
         !y2 = x2 + x3
         !y3 = rotL (Width :: Width w) x3 r1 `xor` y2
-    in k (mkA (Proxy :: Proxy N4 w) y0 y1 y2 y3)
+    in k (mkA y0 y1 y2 y3)
 {-# INLINE stdRot4_0 #-}
 
 stdRot4_1 :: forall w r s . (ThreefryR r N4 w) =>
@@ -201,7 +201,7 @@ stdRot4_1 rot _ x ks ks4 k = threefryR (Rounds :: Rounds r) x ks ks4 $ \ x' ->
         !y3 = rotL (Width :: Width w) x3 r0 `xor` y0
         !y2 = x2 + x1
         !y1 = rotL (Width :: Width w) x1 r1 `xor` y2
-    in k (mkA (Proxy :: Proxy N4 w) y0 y1 y2 y3)
+    in k (mkA y0 y1 y2 y3)
 {-# INLINE stdRot4_1 #-}
 
 {-
@@ -228,7 +228,7 @@ instance (ThreefryR R3 N2 w) => ThreefryR R4 N2 w where
     withA ks $ \ ks0 ks1 ->
     let !z0 = x0 + ks1
         !z1 = x1 + ks2 + 1
-    in k (mkA (Proxy :: Proxy N2 w) z0 z1)
+    in k (mkA z0 z1)
   {-# INLINE threefryR #-}
 
 instance (ThreefryR R4 N2 w) => ThreefryR R5 N2 w where
@@ -249,7 +249,7 @@ instance (ThreefryR R7 N2 w) => ThreefryR R8 N2 w where
     withA ks $ \ ks0 ks1 ->
     let !z0 = x0 + ks2
         !z1 = x1 + ks0 + 2
-    in k (mkA (Proxy :: Proxy N2 w) z0 z1)
+    in k (mkA z0 z1)
   {-# INLINE threefryR #-}
 
 instance (ThreefryR R8 N2 w) => ThreefryR R9 N2 w where
@@ -270,7 +270,7 @@ instance (ThreefryR R11 N2 w) => ThreefryR R12 N2 w where
     withA ks $ \ ks0 ks1 ->
     let !z0 = x0 + ks0
         !z1 = x1 + ks1 + 3
-    in k (mkA (Proxy :: Proxy N2 w) z0 z1)
+    in k (mkA z0 z1)
   {-# INLINE threefryR #-}
 
 instance (ThreefryR R12 N2 w) => ThreefryR R13 N2 w where
@@ -291,7 +291,7 @@ instance (ThreefryR R15 N2 w) => ThreefryR R16 N2 w where
     withA ks $ \ ks0 ks1 ->
     let !z0 = x0 + ks1
         !z1 = x1 + ks2 + 4
-    in k (mkA (Proxy :: Proxy N2 w) z0 z1)
+    in k (mkA z0 z1)
   {-# INLINE threefryR #-}
 
 instance (ThreefryR R16 N2 w) => ThreefryR R17 N2 w where
@@ -312,7 +312,7 @@ instance (ThreefryR R19 N2 w) => ThreefryR R20 N2 w where
     withA ks $ \ ks0 ks1 ->
     let !z0 = x0 + ks2
         !z1 = x1 + ks0 + 5
-    in k (mkA (Proxy :: Proxy N2 w) z0 z1)
+    in k (mkA z0 z1)
   {-# INLINE threefryR #-}
 
 instance (ThreefryR R20 N2 w) => ThreefryR R21 N2 w where
@@ -333,7 +333,7 @@ instance (ThreefryR R23 N2 w) => ThreefryR R24 N2 w where
     withA ks $ \ ks0 ks1 ->
     let !z0 = x0 + ks0
         !z1 = x1 + ks1 + 6
-    in k (mkA (Proxy :: Proxy N2 w) z0 z1)
+    in k (mkA z0 z1)
   {-# INLINE threefryR #-}
 
 instance (ThreefryR R24 N2 w) => ThreefryR R25 N2 w where
@@ -354,7 +354,7 @@ instance (ThreefryR R27 N2 w) => ThreefryR R28 N2 w where
     withA ks $ \ ks0 ks1 ->
     let !z0 = x0 + ks1
         !z1 = x1 + ks2 + 7
-    in k (mkA (Proxy :: Proxy N2 w) z0 z1)
+    in k (mkA z0 z1)
   {-# INLINE threefryR #-}
 
 instance (ThreefryR R28 N2 w) => ThreefryR R29 N2 w where
@@ -375,7 +375,7 @@ instance (ThreefryR R31 N2 w) => ThreefryR R32 N2 w where
     withA ks $ \ ks0 ks1 ->
     let !z0 = x0 + ks2
         !z1 = x1 + ks0 + 8
-    in k (mkA (Proxy :: Proxy N2 w) z0 z1)
+    in k (mkA z0 z1)
   {-# INLINE threefryR #-}
 
 instance (ThreefryR R0 N4 w) => ThreefryR R1 N4 w where
@@ -398,7 +398,7 @@ instance (ThreefryR R3 N4 w) => ThreefryR R4 N4 w where
         !z1 = x1 + ks2
         !z2 = x2 + ks3
         !z3 = x3 + ks4 + 1
-    in k (mkA (Proxy :: Proxy N4 w) z0 z1 z2 z3)
+    in k (mkA z0 z1 z2 z3)
   {-# INLINE threefryR #-}
 
 instance (ThreefryR R4 N4 w) => ThreefryR R5 N4 w where
@@ -421,7 +421,7 @@ instance (ThreefryR R7 N4 w) => ThreefryR R8 N4 w where
         !z1 = x1 + ks3
         !z2 = x2 + ks4
         !z3 = x3 + ks0 + 2
-    in k (mkA (Proxy :: Proxy N4 w) z0 z1 z2 z3)
+    in k (mkA z0 z1 z2 z3)
   {-# INLINE threefryR #-}
 
 instance (ThreefryR R8 N4 w) => ThreefryR R9 N4 w where
@@ -444,7 +444,7 @@ instance (ThreefryR R11 N4 w) => ThreefryR R12 N4 w where
         !z1 = x1 + ks4
         !z2 = x2 + ks0
         !z3 = x3 + ks1 + 3
-    in k (mkA (Proxy :: Proxy N4 w) z0 z1 z2 z3)
+    in k (mkA z0 z1 z2 z3)
   {-# INLINE threefryR #-}
 
 instance (ThreefryR R12 N4 w) => ThreefryR R13 N4 w where
@@ -467,7 +467,7 @@ instance (ThreefryR R15 N4 w) => ThreefryR R16 N4 w where
         !z1 = x1 + ks0
         !z2 = x2 + ks1
         !z3 = x3 + ks2 + 4
-    in k (mkA (Proxy :: Proxy N4 w) z0 z1 z2 z3)
+    in k (mkA z0 z1 z2 z3)
   {-# INLINE threefryR #-}
 
 instance (ThreefryR R16 N4 w) => ThreefryR R17 N4 w where
@@ -490,7 +490,7 @@ instance (ThreefryR R19 N4 w) => ThreefryR R20 N4 w where
         !z1 = x1 + ks1
         !z2 = x2 + ks2
         !z3 = x3 + ks3 + 5
-    in k (mkA (Proxy :: Proxy N4 w) z0 z1 z2 z3)
+    in k (mkA z0 z1 z2 z3)
   {-# INLINE threefryR #-}
 
 instance (ThreefryR R20 N4 w) => ThreefryR R21 N4 w where
@@ -513,7 +513,7 @@ instance (ThreefryR R23 N4 w) => ThreefryR R24 N4 w where
         !z1 = x1 + ks2
         !z2 = x2 + ks3
         !z3 = x3 + ks4 + 6
-    in k (mkA (Proxy :: Proxy N4 w) z0 z1 z2 z3)
+    in k (mkA z0 z1 z2 z3)
   {-# INLINE threefryR #-}
 
 instance (ThreefryR R24 N4 w) => ThreefryR R25 N4 w where
@@ -536,7 +536,7 @@ instance (ThreefryR R27 N4 w) => ThreefryR R28 N4 w where
         !z1 = x1 + ks3
         !z2 = x2 + ks4
         !z3 = x3 + ks0 + 7
-    in k (mkA (Proxy :: Proxy N4 w) z0 z1 z2 z3)
+    in k (mkA z0 z1 z2 z3)
   {-# INLINE threefryR #-}
 
 instance (ThreefryR R28 N4 w) => ThreefryR R29 N4 w where
@@ -559,7 +559,7 @@ instance (ThreefryR R31 N4 w) => ThreefryR R32 N4 w where
         !z1 = x1 + ks4
         !z2 = x2 + ks0
         !z3 = x3 + ks1 + 8
-    in k (mkA (Proxy :: Proxy N4 w) z0 z1 z2 z3)
+    in k (mkA z0 z1 z2 z3)
   {-# INLINE threefryR #-}
 
 -- | The state of a Threefry RNG.
