@@ -16,49 +16,81 @@ import GHC.Word
 
 #if MIN_VERSION_base(4,6,0)
 
+-- | Quantities of words that appear grouped together.
 data Nx = N1 | N2 | N4
 
+-- | Division by two for 'Nx' quantities.
+type family Hlv (n :: Nx) :: Nx
+-- | Multiplication by two for 'Nx' quantities.
+type family Dbl (n :: Nx) :: Nx
+
+-- | Word sizes. The 'WN' constructor represents native word size for the platform.
 data Wd = WN | W8 | W32 | W64
 
+-- | Peano naturals.
 data Nat = Z | S Nat
 
-type family Half (n :: Nx) :: Nx
-type family Dbl (n :: Nx) :: Nx
-data family A (n :: Nx) (w :: Wd) :: *
-newtype Rot n (w :: Wd) = Rot (A (Half n) W8)
-type family Cont (n :: Nx) (w :: Wd) (r :: *) :: *
-type family W (w :: Wd) :: *
+-- | Modulo 8 on peano naturals.
 type family Mod8 (n :: Nat) :: Nat
+-- | Division by 4 on peano naturals.
 type family Div4 (n :: Nat) :: Nat
 
+-- | The type 'A n w' represents 'n' words of width 'w'.
+data family A (n :: Nx) (w :: Wd) :: *
+newtype Rot n (w :: Wd) = Rot (A (Hlv n) W8)
+type family Cont (n :: Nx) (w :: Wd) (r :: *) :: *
+
+-- | The type 'W w' represents a word of width 'w'.
+type family W (w :: Wd) :: *
 data Width (w :: Wd) = Width
 data Rounds (r :: Nat) = Rounds
 
 #else
 
 -- kind Nx
+
+-- | Represents a group of 1.
 data N1
+-- | Represents a group of 2.
 data N2
+-- | Represents a group of 4.
 data N4
 
+-- | Division by two for 'N1', 'N2', 'N4', ...
+type family Hlv n :: *
+-- | Multiplication by two for 'N1', 'N2', 'N4', ...
+type family Dbl n :: *
+
 -- kind Wd
+
+-- | Represents native word width.
 data WN
+-- | Represents a width of 8 bits.
 data W8
+-- | Represents a width of 32 bits.
 data W32
+-- | Represents a width of 64 bits.
 data W64
 
 -- kind Nat
+
+-- | Represents zero in the Peano naturals.
 data Z
+-- | Represents successor in the Peano naturals.
 data S n
 
-type family Half n :: *
-type family Dbl n :: *
-data family A n w :: *
-newtype Rot n w = Rot (A (Half n) W8)
-type family Cont n w r :: *
-type family W w :: *
+-- | Modulo 8 on Peano naturals.
 type family Mod8 n :: *
+-- | Division by 4 on Peano naturals.
 type family Div4 n :: *
+
+-- | The datatype 'A n w' represents 'n' words of width 'w'.
+data family A n w :: *
+newtype Rot n w = Rot (A (Hlv n) W8)
+type family Cont n w r :: *
+
+-- | The datatype 'W w' represents a word of width 'w'.
+type family W w :: *
 
 data Width w = Width
 data Rounds r = Rounds
@@ -67,8 +99,8 @@ data Rounds r = Rounds
 
 type family UnCont (t :: *) :: *
 
-type instance Half N2 = N1
-type instance Half N4 = N2
+type instance Hlv N2 = N1
+type instance Hlv N4 = N2
 
 type instance Dbl N1 = N2
 type instance Dbl N2 = N4
@@ -182,7 +214,7 @@ instance WithA N4 W64 where
   mkA                         = A4x64
   {-# INLINE mkA #-}
 
-withRot :: (WithA (Half n) W8) => Rot n w -> Cont (Half n) W8 r -> r
+withRot :: (WithA (Hlv n) W8) => Rot n w -> Cont (Hlv n) W8 r -> r
 withRot (Rot a) = withA a
 
 data DoubleList =

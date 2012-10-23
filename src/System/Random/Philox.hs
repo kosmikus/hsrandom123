@@ -99,11 +99,11 @@ instance PhiloxW W64 where
 #endif
 
 type PhiloxCtr n w = A n w
-type PhiloxKey n w = A (Half n) w
+type PhiloxKey n w = A (Hlv n) w
 
-class (PhiloxW w, PhiloxN n, WithA n w, WithA (Half n) w, ToDoubles n w, Dbl (Half n) ~ n) => Philox n w where
-  multipliers :: A (Half n) w
-  bumpers     :: A (Half n) w
+class (PhiloxW w, PhiloxN n, WithA n w, WithA (Hlv n) w, ToDoubles n w, Dbl (Hlv n) ~ n) => Philox n w where
+  multipliers :: A (Hlv n) w
+  bumpers     :: A (Hlv n) w
   philoxRound :: PhiloxCtr n w -> PhiloxKey n w -> PhiloxCtr n w
   bumpKey     :: PhiloxKey n w -> PhiloxKey n w
   stream      :: PhiloxCtr n w -> PhiloxKey n w -> [W w]
@@ -190,8 +190,8 @@ instance Philox N4 W32 where
   {-# INLINE ustream #-}
 
 class Counter n => PhiloxN n where
-  bk   :: forall w . (Philox n w) => A (Half n) w -> A (Half n) w
-  pR   :: forall w . (Philox n w) => A n w -> A (Half n) w -> A n w
+  bk   :: forall w . (Philox n w) => A (Hlv n) w -> A (Hlv n) w
+  pR   :: forall w . (Philox n w) => A n w -> A (Hlv n) w -> A n w
 
 instance PhiloxN N2 where
   bk (key :: A N1 w) =
@@ -271,7 +271,7 @@ data PhiloxState s n w = PS {-# UNPACK #-} !(MutVar s DoubleList) {-# UNPACK #-}
 type PhiloxStateIO   = PhiloxState (PrimState IO)
 type PhiloxStateST s = PhiloxState (PrimState (ST s))
 
-new :: (PrimMonad m, Philox n w) => A n w -> A (Half n) w -> m (PhiloxState (PrimState m) n w)
+new :: (PrimMonad m, Philox n w) => A n w -> A (Hlv n) w -> m (PhiloxState (PrimState m) n w)
 new ctr key = do
   svd <- newMutVar DoubleNil
   ph  <- newMutVar (init ctr key)
@@ -304,7 +304,7 @@ newtype PhiloxStateRaw s n w = PSR (MutVar s (PhiloxData n w))
 type PhiloxStateRawIO   = PhiloxStateRaw (PrimState IO)
 type PhiloxStateRawST s = PhiloxStateRaw (PrimState (ST s))
 
-newRaw :: (PrimMonad m, Philox n w) => A n w -> A (Half n) w -> m (PhiloxStateRaw (PrimState m) n w)
+newRaw :: (PrimMonad m, Philox n w) => A n w -> A (Hlv n) w -> m (PhiloxStateRaw (PrimState m) n w)
 newRaw ctr key = do
   ph <- newMutVar (init ctr key)
   return (PSR ph)
