@@ -1,5 +1,11 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE KindSignatures, DataKinds, MultiParamTypeClasses, FlexibleInstances, BangPatterns, FlexibleContexts, ScopedTypeVariables, TypeFamilies #-}
+{-# LANGUAGE KindSignatures, MultiParamTypeClasses, FlexibleInstances, BangPatterns, FlexibleContexts, ScopedTypeVariables, TypeFamilies #-}
+
+#if MIN_VERSION_base(4,6,0)
+
+{-# LANGUAGE DataKinds #-}
+
+#endif
 
 module System.Random.Threefry (
   module System.Random.Threefry, module System.Random.HsRandom123.Utils
