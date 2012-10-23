@@ -19,6 +19,7 @@ import Data.Bits
 import Data.Primitive.MutVar
 import Data.Word
 import GHC.Exts
+import GHC.Word
 import Prelude hiding (init)
 import System.Random.HsRandom123.Utils
 
@@ -267,7 +268,7 @@ new ctr key = do
   ph  <- newMutVar (init ctr (A2 key))
   return (PS svd ph)
 
-uniform :: (PrimMonad m, Philox n w) => PhiloxState (PrimState m) n w -> m Double
+uniform :: (PrimMonad m, Philox n w, PrimState m ~ s) => PhiloxState s n w -> m Double
 uniform (PS svd ph) = do
   ds <- readMutVar svd
   case ds of
@@ -280,14 +281,14 @@ uniform (PS svd ph) = do
                     writeMutVar ph $! inc rng
                     writeMutVar svd rs
                     return r
-{-# SPECIALIZE uniform :: PhiloxState (PrimState IO)     N2 W32 -> IO   Double #-}
-{-# SPECIALIZE uniform :: PhiloxState (PrimState IO)     N4 W32 -> IO   Double #-}
-{-# SPECIALIZE uniform :: PhiloxState (PrimState IO)     N2 W64 -> IO   Double #-}
-{-# SPECIALIZE uniform :: PhiloxState (PrimState IO)     N4 W64 -> IO   Double #-}
-{-# SPECIALIZE uniform :: PhiloxState (PrimState (ST s)) N2 W32 -> ST s Double #-}
-{-# SPECIALIZE uniform :: PhiloxState (PrimState (ST s)) N4 W32 -> ST s Double #-}
-{-# SPECIALIZE uniform :: PhiloxState (PrimState (ST s)) N2 W64 -> ST s Double #-}
-{-# SPECIALIZE uniform :: PhiloxState (PrimState (ST s)) N4 W64 -> ST s Double #-}
+{-# SPECIALIZE uniform :: PhiloxState RealWorld N2 W32 -> IO   Double #-}
+{-# SPECIALIZE uniform :: PhiloxState RealWorld N4 W32 -> IO   Double #-}
+{-# SPECIALIZE uniform :: PhiloxState RealWorld N2 W64 -> IO   Double #-}
+{-# SPECIALIZE uniform :: PhiloxState RealWorld N4 W64 -> IO   Double #-}
+{-# SPECIALIZE uniform :: PhiloxState s         N2 W32 -> ST s Double #-}
+{-# SPECIALIZE uniform :: PhiloxState s         N4 W32 -> ST s Double #-}
+{-# SPECIALIZE uniform :: PhiloxState s         N2 W64 -> ST s Double #-}
+{-# SPECIALIZE uniform :: PhiloxState s         N4 W64 -> ST s Double #-}
 
 newtype PhiloxStateRaw s n w = PSR (MutVar s (PhiloxData n w))
 
@@ -296,17 +297,17 @@ newRaw ctr key = do
   ph <- newMutVar (init ctr (A2 key))
   return (PSR ph)
 
-nextRaw :: (PrimMonad m, Philox n w) => PhiloxStateRaw (PrimState m) n w -> m (A n w)
+nextRaw :: (PrimMonad m, Philox n w, PrimState m ~ s) => PhiloxStateRaw s n w -> m (A n w)
 nextRaw (PSR ph) = do
   rng <- readMutVar ph
   writeMutVar ph $! inc rng
   return (get rng)
-{-# SPECIALIZE nextRaw :: PhiloxStateRaw (PrimState IO)     N2 W32 -> IO   (A N2 W32) #-}
-{-# SPECIALIZE nextRaw :: PhiloxStateRaw (PrimState IO)     N4 W32 -> IO   (A N4 W32) #-}
-{-# SPECIALIZE nextRaw :: PhiloxStateRaw (PrimState IO)     N2 W64 -> IO   (A N2 W64) #-}
-{-# SPECIALIZE nextRaw :: PhiloxStateRaw (PrimState IO)     N4 W64 -> IO   (A N4 W64) #-}
-{-# SPECIALIZE nextRaw :: PhiloxStateRaw (PrimState (ST s)) N2 W32 -> ST s (A N2 W32) #-}
-{-# SPECIALIZE nextRaw :: PhiloxStateRaw (PrimState (ST s)) N4 W32 -> ST s (A N4 W32) #-}
-{-# SPECIALIZE nextRaw :: PhiloxStateRaw (PrimState (ST s)) N2 W64 -> ST s (A N2 W64) #-}
-{-# SPECIALIZE nextRaw :: PhiloxStateRaw (PrimState (ST s)) N4 W64 -> ST s (A N4 W64) #-}
+{-# SPECIALIZE nextRaw :: PhiloxStateRaw RealWorld N2 W32 -> IO   (A N2 W32) #-}
+{-# SPECIALIZE nextRaw :: PhiloxStateRaw RealWorld N4 W32 -> IO   (A N4 W32) #-}
+{-# SPECIALIZE nextRaw :: PhiloxStateRaw RealWorld N2 W64 -> IO   (A N2 W64) #-}
+{-# SPECIALIZE nextRaw :: PhiloxStateRaw RealWorld N4 W64 -> IO   (A N4 W64) #-}
+{-# SPECIALIZE nextRaw :: PhiloxStateRaw s         N2 W32 -> ST s (A N2 W32) #-}
+{-# SPECIALIZE nextRaw :: PhiloxStateRaw s         N4 W32 -> ST s (A N4 W32) #-}
+{-# SPECIALIZE nextRaw :: PhiloxStateRaw s         N2 W64 -> ST s (A N2 W64) #-}
+{-# SPECIALIZE nextRaw :: PhiloxStateRaw s         N4 W64 -> ST s (A N4 W64) #-}
 

@@ -636,7 +636,7 @@ new ctr key = do
   ph  <- newMutVar (init ctr key)
   return (TS svd ph)
 
-uniform :: (PrimMonad m, Threefry n w, ThreefryR RD n w) => ThreefryState (PrimState m) n w -> m Double
+uniform :: (PrimMonad m, PrimState m ~ s, Threefry n w, ThreefryR RD n w) => ThreefryState s n w -> m Double
 uniform (TS svd ph) = do
   ds <- readMutVar svd
   case ds of
@@ -649,14 +649,14 @@ uniform (TS svd ph) = do
                     writeMutVar ph $! inc rng
                     writeMutVar svd rs
                     return r
-{-# SPECIALIZE uniform :: ThreefryState (PrimState IO    ) N2 W32 -> IO   Double #-}
-{-# SPECIALIZE uniform :: ThreefryState (PrimState IO    ) N4 W32 -> IO   Double #-}
-{-# SPECIALIZE uniform :: ThreefryState (PrimState IO    ) N2 W64 -> IO   Double #-}
-{-# SPECIALIZE uniform :: ThreefryState (PrimState IO    ) N4 W64 -> IO   Double #-}
-{-# SPECIALIZE uniform :: ThreefryState (PrimState (ST s)) N2 W32 -> ST s Double #-}
-{-# SPECIALIZE uniform :: ThreefryState (PrimState (ST s)) N4 W32 -> ST s Double #-}
-{-# SPECIALIZE uniform :: ThreefryState (PrimState (ST s)) N2 W64 -> ST s Double #-}
-{-# SPECIALIZE uniform :: ThreefryState (PrimState (ST s)) N4 W64 -> ST s Double #-}
+{-# SPECIALIZE uniform :: ThreefryState RealWorld N2 W32 -> IO   Double #-}
+{-# SPECIALIZE uniform :: ThreefryState RealWorld N4 W32 -> IO   Double #-}
+{-# SPECIALIZE uniform :: ThreefryState RealWorld N2 W64 -> IO   Double #-}
+{-# SPECIALIZE uniform :: ThreefryState RealWorld N4 W64 -> IO   Double #-}
+{-# SPECIALIZE uniform :: ThreefryState s         N2 W32 -> ST s Double #-}
+{-# SPECIALIZE uniform :: ThreefryState s         N4 W32 -> ST s Double #-}
+{-# SPECIALIZE uniform :: ThreefryState s         N2 W64 -> ST s Double #-}
+{-# SPECIALIZE uniform :: ThreefryState s         N4 W64 -> ST s Double #-}
 
 newtype ThreefryStateRaw s n w = TSR (MutVar s (ThreefryData n w))
 
@@ -665,18 +665,18 @@ newRaw ctr key = do
   tf <- newMutVar (init ctr key)
   return (TSR tf)
 
-nextRaw :: (PrimMonad m, Threefry n w, ThreefryR RD n w) => ThreefryStateRaw (PrimState m) n w -> m (A n w)
+nextRaw :: (PrimMonad m, PrimState m ~ s, Threefry n w, ThreefryR RD n w) => ThreefryStateRaw s n w -> m (A n w)
 nextRaw (TSR tf) = do
   rng <- readMutVar tf
   writeMutVar tf $! inc rng
   return (get rng)
 
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw (PrimState IO    ) N2 W32 -> IO   (A N2 W32) #-}
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw (PrimState IO    ) N4 W32 -> IO   (A N4 W32) #-}
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw (PrimState IO    ) N2 W64 -> IO   (A N2 W64) #-}
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw (PrimState IO    ) N4 W64 -> IO   (A N4 W64) #-}
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw (PrimState (ST s)) N2 W32 -> ST s (A N2 W32) #-}
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw (PrimState (ST s)) N4 W32 -> ST s (A N4 W32) #-}
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw (PrimState (ST s)) N2 W64 -> ST s (A N2 W64) #-}
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw (PrimState (ST s)) N4 W64 -> ST s (A N4 W64) #-}
+{-# SPECIALIZE nextRaw :: ThreefryStateRaw RealWorld N2 W32 -> IO   (A N2 W32) #-}
+{-# SPECIALIZE nextRaw :: ThreefryStateRaw RealWorld N4 W32 -> IO   (A N4 W32) #-}
+{-# SPECIALIZE nextRaw :: ThreefryStateRaw RealWorld N2 W64 -> IO   (A N2 W64) #-}
+{-# SPECIALIZE nextRaw :: ThreefryStateRaw RealWorld N4 W64 -> IO   (A N4 W64) #-}
+{-# SPECIALIZE nextRaw :: ThreefryStateRaw s         N2 W32 -> ST s (A N2 W32) #-}
+{-# SPECIALIZE nextRaw :: ThreefryStateRaw s         N4 W32 -> ST s (A N4 W32) #-}
+{-# SPECIALIZE nextRaw :: ThreefryStateRaw s         N2 W64 -> ST s (A N2 W64) #-}
+{-# SPECIALIZE nextRaw :: ThreefryStateRaw s         N4 W64 -> ST s (A N4 W64) #-}
 
