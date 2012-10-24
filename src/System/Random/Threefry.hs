@@ -663,14 +663,7 @@ uniform (TS svd ph) = do
                     writeMutVar ph $! inc rng
                     writeMutVar svd rs
                     return r
-{-# SPECIALIZE uniform :: ThreefryState RealWorld N2 W32 -> IO   Double #-}
-{-# SPECIALIZE uniform :: ThreefryState RealWorld N4 W32 -> IO   Double #-}
-{-# SPECIALIZE uniform :: ThreefryState RealWorld N2 W64 -> IO   Double #-}
-{-# SPECIALIZE uniform :: ThreefryState RealWorld N4 W64 -> IO   Double #-}
-{-# SPECIALIZE uniform :: ThreefryState s         N2 W32 -> ST s Double #-}
-{-# SPECIALIZE uniform :: ThreefryState s         N4 W32 -> ST s Double #-}
-{-# SPECIALIZE uniform :: ThreefryState s         N2 W64 -> ST s Double #-}
-{-# SPECIALIZE uniform :: ThreefryState s         N4 W64 -> ST s Double #-}
+{-# INLINE uniform #-}
 
 newtype ThreefryStateRaw s n w = TSR (MutVar s (ThreefryData n w))
 
@@ -687,13 +680,4 @@ nextRaw (TSR tf) = do
   rng <- readMutVar tf
   writeMutVar tf $! inc rng
   return (get rng)
-
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw RealWorld N2 W32 -> IO   (A N2 W32) #-}
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw RealWorld N4 W32 -> IO   (A N4 W32) #-}
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw RealWorld N2 W64 -> IO   (A N2 W64) #-}
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw RealWorld N4 W64 -> IO   (A N4 W64) #-}
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw s         N2 W32 -> ST s (A N2 W32) #-}
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw s         N4 W32 -> ST s (A N4 W32) #-}
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw s         N2 W64 -> ST s (A N2 W64) #-}
-{-# SPECIALIZE nextRaw :: ThreefryStateRaw s         N4 W64 -> ST s (A N4 W64) #-}
-
+{-# INLINE nextRaw #-}

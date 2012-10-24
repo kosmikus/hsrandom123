@@ -38,7 +38,7 @@ library
                       deepseq,
                       primitive
   -- ghc-options:        -O2
-  -- ghc-options:        -Wall
+  ghc-options:        -Wall
   -- ghc-options:        -Odph -fno-liberate-case -funfolding-use-threshold1000 -funfolding-keeness-factor1000
 
 benchmark hsrandom123-bench
@@ -51,5 +51,5 @@ benchmark hsrandom123-bench
                       mwc-random,
                       primitive
   -- ghc-options:        -O2
-  -- ghc-options:        -Wall
+  ghc-options:        -Wall
   -- ghc-options:        -Odph -fno-liberate-case -funfolding-use-threshold1000 -funfolding-keeness-factor1000
