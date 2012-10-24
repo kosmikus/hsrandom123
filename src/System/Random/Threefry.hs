@@ -148,7 +148,7 @@ class (Threefry n w) => ThreefryR r n w where
                           (ThreefryCtr n w -> s) -> s
 
 instance (Threefry N2 w) => ThreefryR R0 N2 w where
-  threefryR _ x ks k2 k =
+  threefryR _ x ks _k2 k =
     withA x $ \ x0 x1 ->
     withA ks $ \ ks0 ks1 ->
     let !y0 = x0 + ks0
@@ -157,7 +157,7 @@ instance (Threefry N2 w) => ThreefryR R0 N2 w where
   {-# INLINE threefryR #-}
 
 instance (Threefry N4 w) => ThreefryR R0 N4 w where
-  threefryR _ x ks k4 k =
+  threefryR _ x ks _k4 k =
     withA x $ \ x0 x1 x2 x3 ->
     withA ks $ \ ks0 ks1 ks2 ks3 ->
     let !y0 = x0 + ks0
@@ -225,7 +225,7 @@ instance (ThreefryR R2 N2 w) => ThreefryR R3 N2 w where
 instance (ThreefryR R3 N2 w) => ThreefryR R4 N2 w where
   threefryR r x ks ks2 k = stdRot2 (rot3 :: Rot N2 w) r x ks ks2 $ \ x' ->
     withA x' $ \ x0 x1 ->
-    withA ks $ \ ks0 ks1 ->
+    withA ks $ \ _ks0 ks1 ->
     let !z0 = x0 + ks1
         !z1 = x1 + ks2 + 1
     in k (mkA z0 z1)
@@ -246,7 +246,7 @@ instance (ThreefryR R6 N2 w) => ThreefryR R7 N2 w where
 instance (ThreefryR R7 N2 w) => ThreefryR R8 N2 w where
   threefryR r x ks ks2 k = stdRot2 (rot7 :: Rot N2 w) r x ks ks2 $ \ x' ->
     withA x' $ \ x0 x1 ->
-    withA ks $ \ ks0 ks1 ->
+    withA ks $ \ ks0 _ks1 ->
     let !z0 = x0 + ks2
         !z1 = x1 + ks0 + 2
     in k (mkA z0 z1)
@@ -288,7 +288,7 @@ instance (ThreefryR R14 N2 w) => ThreefryR R15 N2 w where
 instance (ThreefryR R15 N2 w) => ThreefryR R16 N2 w where
   threefryR r x ks ks2 k = stdRot2 (rot7 :: Rot N2 w) r x ks ks2 $ \ x' ->
     withA x' $ \ x0 x1 ->
-    withA ks $ \ ks0 ks1 ->
+    withA ks $ \ _ks0 ks1 ->
     let !z0 = x0 + ks1
         !z1 = x1 + ks2 + 4
     in k (mkA z0 z1)
@@ -309,7 +309,7 @@ instance (ThreefryR R18 N2 w) => ThreefryR R19 N2 w where
 instance (ThreefryR R19 N2 w) => ThreefryR R20 N2 w where
   threefryR r x ks ks2 k = stdRot2 (rot3 :: Rot N2 w) r x ks ks2 $ \ x' ->
     withA x' $ \ x0 x1 ->
-    withA ks $ \ ks0 ks1 ->
+    withA ks $ \ ks0 _ks1 ->
     let !z0 = x0 + ks2
         !z1 = x1 + ks0 + 5
     in k (mkA z0 z1)
@@ -351,7 +351,7 @@ instance (ThreefryR R26 N2 w) => ThreefryR R27 N2 w where
 instance (ThreefryR R27 N2 w) => ThreefryR R28 N2 w where
   threefryR r x ks ks2 k = stdRot2 (rot3 :: Rot N2 w) r x ks ks2 $ \ x' ->
     withA x' $ \ x0 x1 ->
-    withA ks $ \ ks0 ks1 ->
+    withA ks $ \ _ks0 ks1 ->
     let !z0 = x0 + ks1
         !z1 = x1 + ks2 + 7
     in k (mkA z0 z1)
@@ -372,7 +372,7 @@ instance (ThreefryR R30 N2 w) => ThreefryR R31 N2 w where
 instance (ThreefryR R31 N2 w) => ThreefryR R32 N2 w where
   threefryR r x ks ks2 k = stdRot2 (rot7 :: Rot N2 w) r x ks ks2 $ \ x' ->
     withA x' $ \ x0 x1 ->
-    withA ks $ \ ks0 ks1 ->
+    withA ks $ \ ks0 _ks1 ->
     let !z0 = x0 + ks2
         !z1 = x1 + ks0 + 8
     in k (mkA z0 z1)
@@ -393,7 +393,7 @@ instance (ThreefryR R2 N4 w) => ThreefryR R3 N4 w where
 instance (ThreefryR R3 N4 w) => ThreefryR R4 N4 w where
   threefryR r x ks ks4 k = stdRot4_1 (rot3 :: Rot N4 w) r x ks ks4 $ \ x' ->
     withA x' $ \ x0 x1 x2 x3 ->
-    withA ks $ \ ks0 ks1 ks2 ks3 ->
+    withA ks $ \ _ks0 ks1 ks2 ks3 ->
     let !z0 = x0 + ks1
         !z1 = x1 + ks2
         !z2 = x2 + ks3
@@ -416,7 +416,7 @@ instance (ThreefryR R6 N4 w) => ThreefryR R7 N4 w where
 instance (ThreefryR R7 N4 w) => ThreefryR R8 N4 w where
   threefryR r x ks ks4 k = stdRot4_1 (rot7 :: Rot N4 w) r x ks ks4 $ \ x' ->
     withA x' $ \ x0 x1 x2 x3 ->
-    withA ks $ \ ks0 ks1 ks2 ks3 ->
+    withA ks $ \ ks0 _ks1 ks2 ks3 ->
     let !z0 = x0 + ks2
         !z1 = x1 + ks3
         !z2 = x2 + ks4
@@ -439,7 +439,7 @@ instance (ThreefryR R10 N4 w) => ThreefryR R11 N4 w where
 instance (ThreefryR R11 N4 w) => ThreefryR R12 N4 w where
   threefryR r x ks ks4 k = stdRot4_1 (rot3 :: Rot N4 w) r x ks ks4 $ \ x' ->
     withA x' $ \ x0 x1 x2 x3 ->
-    withA ks $ \ ks0 ks1 ks2 ks3 ->
+    withA ks $ \ ks0 ks1 _ks2 ks3 ->
     let !z0 = x0 + ks3
         !z1 = x1 + ks4
         !z2 = x2 + ks0
@@ -462,7 +462,7 @@ instance (ThreefryR R14 N4 w) => ThreefryR R15 N4 w where
 instance (ThreefryR R15 N4 w) => ThreefryR R16 N4 w where
   threefryR r x ks ks4 k = stdRot4_1 (rot7 :: Rot N4 w) r x ks ks4 $ \ x' ->
     withA x' $ \ x0 x1 x2 x3 ->
-    withA ks $ \ ks0 ks1 ks2 ks3 ->
+    withA ks $ \ ks0 ks1 ks2 _ks3 ->
     let !z0 = x0 + ks4
         !z1 = x1 + ks0
         !z2 = x2 + ks1
@@ -508,7 +508,7 @@ instance (ThreefryR R22 N4 w) => ThreefryR R23 N4 w where
 instance (ThreefryR R23 N4 w) => ThreefryR R24 N4 w where
   threefryR r x ks ks4 k = stdRot4_1 (rot7 :: Rot N4 w) r x ks ks4 $ \ x' ->
     withA x' $ \ x0 x1 x2 x3 ->
-    withA ks $ \ ks0 ks1 ks2 ks3 ->
+    withA ks $ \ _ks0 ks1 ks2 ks3 ->
     let !z0 = x0 + ks1
         !z1 = x1 + ks2
         !z2 = x2 + ks3
@@ -531,7 +531,7 @@ instance (ThreefryR R26 N4 w) => ThreefryR R27 N4 w where
 instance (ThreefryR R27 N4 w) => ThreefryR R28 N4 w where
   threefryR r x ks ks4 k = stdRot4_1 (rot3 :: Rot N4 w) r x ks ks4 $ \ x' ->
     withA x' $ \ x0 x1 x2 x3 ->
-    withA ks $ \ ks0 ks1 ks2 ks3 ->
+    withA ks $ \ ks0 _ks1 ks2 ks3 ->
     let !z0 = x0 + ks2
         !z1 = x1 + ks3
         !z2 = x2 + ks4
@@ -554,7 +554,7 @@ instance (ThreefryR R30 N4 w) => ThreefryR R31 N4 w where
 instance (ThreefryR R31 N4 w) => ThreefryR R32 N4 w where
   threefryR r x ks ks4 k = stdRot4_1 (rot7 :: Rot N4 w) r x ks ks4 $ \ x' ->
     withA x' $ \ x0 x1 x2 x3 ->
-    withA ks $ \ ks0 ks1 ks2 ks3 ->
+    withA ks $ \ ks0 ks1 _ks2 ks3 ->
     let !z0 = x0 + ks3
         !z1 = x1 + ks4
         !z2 = x2 + ks0

@@ -12,7 +12,6 @@ import Control.DeepSeq
 import Data.Bits
 import Data.Int
 import Data.Word
-import GHC.Word
 
 #if MIN_VERSION_base(4,6,0)
 
