@@ -7,8 +7,6 @@ maintainer:           andres@well-typed.com
 stability:            experimental
 build-type:           Simple
 cabal-version:        >= 1.8
-extra-source-files:   src/include/*.h
-                      src/include/features/*.h
 category:             Math
 synopsis:             Counter-based Random Number Generators in Haskell
 description:          This library contains pure Haskell implementations of the counter-based random-number
@@ -23,6 +21,7 @@ description:          This library contains pure Haskell implementations of the 
                       such, they are easy to use in both parallel and distributed settings. They fare well in
                       classic PRNG tests such as Dieharder and Crush, however they are not suitable for use in
                       cryptography or security.
+extra-source-files:   CREDIT
 
 source-repository head
   type:               git
