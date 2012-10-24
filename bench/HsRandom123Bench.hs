@@ -36,6 +36,8 @@ main = do
         , bench "philox4x32" $ nf (take 1000 . P.ustream zero) (zero :: A N2 W32)
         , bench "philox2x64" $ nf (take 1000 . P.ustream zero) (zero :: A N1 W64)
         , bench "philox4x64" $ nf (take 1000 . P.ustream zero) (zero :: A N2 W64)
+        , bench "4x32 stream" $ nfIO (replicateM 1000 (P.uniform philox4x32))
+        , bench "4x64 stream" $ nfIO (replicateM 1000 (P.uniform philox4x64))
       ]
     , bgroup "Threefry stream" [
           bench "threefry2x32" $ nf (take 1000 . T.ustream zero) (zero :: A N2 W32)
