@@ -31,7 +31,8 @@ library
   hs-source-dirs:     src
   exposed-modules:    System.Random.Philox
                       System.Random.Threefry
-  other-modules:      System.Random.HsRandom123.Utils
+                      System.Random.HsRandom123.Utils
+  -- other-modules:      System.Random.HsRandom123.Utils
   build-depends:      base >= 3 && < 6,
                       array,
                       deepseq,
@@ -51,4 +52,5 @@ benchmark hsrandom123-bench
                       primitive
   -- ghc-options:        -O2
   ghc-options:        -Wall
+  ghc-options:        -fsimpl-tick-factor=130
   -- ghc-options:        -Odph -fno-liberate-case -funfolding-use-threshold1000 -funfolding-keeness-factor1000

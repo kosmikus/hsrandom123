@@ -223,9 +223,17 @@ data DoubleList =
     DoubleNil
   | DoubleCons {-# UNPACK #-} !Double DoubleList
 
+data Word32List =
+    Word32Nil
+  | Word32Cons {-# UNPACK #-} !Word32 Word32List
+
 class ToDoubles n w where
-  toDoubles :: A n w -> (Double -> [Double] -> r) -> r
+  toDoubles  :: A n w -> (Double -> [Double] -> r) -> r
   toDoublesL :: A n w -> (Double -> DoubleList -> r) -> r
+
+class ToWord32s n w where
+  toWord32s  :: A n w -> (Word32 -> [Word32] -> r) -> r
+  toWord32sL :: A n w -> (Word32 -> Word32List -> r) -> r
 
 instance ToDoubles N2 W64 where
   toDoubles (A2x64 w0 w1) k = k d0 [d1]
@@ -238,6 +246,18 @@ instance ToDoubles N2 W64 where
       !d0 = wordToDouble w0
       !d1 = wordToDouble w1 
   {-# INLINE toDoublesL #-}
+
+instance ToWord32s N2 W64 where
+  toWord32s (A2x64 lw0 lw1) k = k w0 [w1, w2, w3]
+    where
+      !(# w0, w1 #) = word64ToWords32 lw0
+      !(# w2, w3 #) = word64ToWords32 lw1
+  {-# INLINE toWord32s #-}
+  toWord32sL (A2x64 lw0 lw1) k = k w0 (Word32Cons w1 (Word32Cons w2 (Word32Cons w3 Word32Nil)))
+    where
+      !(# w0, w1 #) = word64ToWords32 lw0
+      !(# w2, w3 #) = word64ToWords32 lw1
+  {-# INLINE toWord32sL #-}
 
 instance ToDoubles N4 W64 where
   toDoubles (A4x64 w0 w1 w2 w3) k = k d0 [d1, d2, d3]
@@ -255,11 +275,33 @@ instance ToDoubles N4 W64 where
       !d3 = wordToDouble w3
   {-# INLINE toDoublesL #-}
 
+instance ToWord32s N4 W64 where
+  toWord32s (A4x64 lw0 lw1 lw2 lw3) k = k w0 [w1, w2, w3, w4, w5, w6, w7]
+    where
+      !(# w0, w1 #) = word64ToWords32 lw0
+      !(# w2, w3 #) = word64ToWords32 lw1
+      !(# w4, w5 #) = word64ToWords32 lw2
+      !(# w6, w7 #) = word64ToWords32 lw3
+  {-# INLINE toWord32s #-}
+  toWord32sL (A4x64 lw0 lw1 lw2 lw3) k = k w0 (Word32Cons w1 (Word32Cons w2 (Word32Cons w3 (Word32Cons w4 (Word32Cons w5 (Word32Cons w6 (Word32Cons w7 Word32Nil)))))))
+    where
+      !(# w0, w1 #) = word64ToWords32 lw0
+      !(# w2, w3 #) = word64ToWords32 lw1
+      !(# w4, w5 #) = word64ToWords32 lw2
+      !(# w6, w7 #) = word64ToWords32 lw3
+  {-# INLINE toWord32sL #-}
+
 instance ToDoubles N2 W32 where
   toDoubles (A2x32 w0 w1) k = (k $! wordsToDouble w0 w1) []
   {-# INLINE toDoubles #-}
   toDoublesL (A2x32 w0 w1) k = (k $! wordsToDouble w0 w1) DoubleNil
   {-# INLINE toDoublesL #-}
+
+instance ToWord32s N2 W32 where
+  toWord32s (A2x32 w0 w1) k = k w0 [w1]
+  {-# INLINE toWord32s #-}
+  toWord32sL (A2x32 w0 w1) k = k w0 (Word32Cons w1 Word32Nil)
+  {-# INLINE toWord32sL #-}
 
 instance ToDoubles N4 W32 where
   toDoubles (A4x32 w0 w1 w2 w3) k = k d0 [d1]
@@ -272,6 +314,12 @@ instance ToDoubles N4 W32 where
       !d0 = wordsToDouble w0 w1
       !d1 = wordsToDouble w2 w3
   {-# INLINE toDoublesL #-}
+
+instance ToWord32s N4 W32 where
+  toWord32s (A4x32 w0 w1 w2 w3) k = k w0 [w1, w2, w3]
+  {-# INLINE toWord32s #-}
+  toWord32sL (A4x32 w0 w1 w2 w3) k = k w0 (Word32Cons w1 (Word32Cons w2 (Word32Cons w3 Word32Nil)))
+  {-# INLINE toWord32sL #-}
 
 class Counter n where
   zero :: forall w . (WithA n w) => A n w
@@ -376,6 +424,10 @@ streamToDouble32 (w1 : w2 : ws) = wordsToDouble w1 w2 : streamToDouble32 ws
 
 streamToDouble64 :: [Word64] -> [Double]
 streamToDouble64 (w : ws) = wordToDouble w : streamToDouble64 ws
+
+word64ToWords32 :: Word64 -> (# Word32, Word32 #)
+word64ToWords32 lw = (# fromIntegral (lw `shiftR` 32), fromIntegral lw #)
+{-# INLINE word64ToWords32 #-}
 
 -- from bos
 wordsToDouble :: Word32 -> Word32 -> Double

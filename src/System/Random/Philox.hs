@@ -101,7 +101,7 @@ instance PhiloxW W64 where
 type PhiloxCtr n w = A n w
 type PhiloxKey n w = A (Hlv n) w
 
-class (PhiloxW w, PhiloxN n, WithA n w, WithA (Hlv n) w, ToDoubles n w, Dbl (Hlv n) ~ n) => Philox n w where
+class (PhiloxW w, PhiloxN n, WithA n w, WithA (Hlv n) w, ToDoubles n w, ToWord32s n w, Dbl (Hlv n) ~ n) => Philox n w where
   multipliers :: A (Hlv n) w
   bumpers     :: A (Hlv n) w
   philoxRound :: PhiloxCtr n w -> PhiloxKey n w -> PhiloxCtr n w
@@ -266,6 +266,12 @@ step :: (Philox n w) => PhiloxData n w -> (A n w, PhiloxData n w)
 step rng = (get rng, inc rng)
 {-# INLINE step #-}
 
+{-
+data PhiloxState s n w = PS {-# UNPACK #-} !(MutVar s (A n w))
+                            {-# UNPACK #-} !(MutVar s Int)
+                            {-# UNPACK #-} !(MutVar s (PhiloxData n w))
+-}
+
 data PhiloxState s n w = PS {-# UNPACK #-} !(MutVar s DoubleList) {-# UNPACK #-} !(MutVar s (PhiloxData n w))
 
 type PhiloxStateIO   = PhiloxState (PrimState IO)
@@ -291,6 +297,46 @@ uniform (PS svd ph) = do
                     writeMutVar svd rs
                     return r
 {-# INLINE uniform #-}
+
+data PhiloxStateWord32 s n w = PSW {-# UNPACK #-} !(MutVar s Word32List) {-# UNPACK #-} !(MutVar s (PhiloxData n w))
+
+type PhiloxStateWord32IO   = PhiloxStateWord32 (PrimState IO)
+type PhiloxStateWord32ST s = PhiloxStateWord32 (PrimState (ST s))
+
+newWord32 :: (PrimMonad m, Philox n w) => A n w -> A (Hlv n) w -> m (PhiloxStateWord32 (PrimState m) n w)
+newWord32 ctr key = do
+  svd <- newMutVar Word32Nil
+  ph  <- newMutVar (init ctr key)
+  return (PSW svd ph)
+
+uniformWord32 :: (PrimMonad m, Philox n w) => PhiloxStateWord32 (PrimState m) n w -> m Double
+uniformWord32 (PSW svd ph) = do
+  ds <- readMutVar svd
+  case ds of
+    (Word32Cons x0 (Word32Cons x1 xs)) -> do
+                writeMutVar svd xs
+                return (wordsToDouble x0 x1)
+    (Word32Cons x0 Word32Nil) -> do
+                rng <- readMutVar ph
+                toWord32sL (get rng) $ \ x1 xs -> do
+                    writeMutVar ph $! inc rng
+                    writeMutVar svd xs
+                    return (wordsToDouble x0 x1)
+    Word32Nil -> do
+                rng <- readMutVar ph
+                toWord32sL (get rng) $ \ x0 xs ->
+                  case xs of
+                    (Word32Cons x1 ys) -> do
+                      writeMutVar ph $! inc rng
+                      writeMutVar svd ys
+                      return (wordsToDouble x0 x1)
+                    Word32Nil -> do
+                      let !rng' = inc rng
+                      toWord32sL (get rng') $ \ x1 ys -> do
+                        writeMutVar ph $! inc rng'
+                        writeMutVar svd ys
+                        return (wordsToDouble x0 x1)
+{-# INLINE uniformWord32 #-}
 
 newtype PhiloxStateRaw s n w = PSR (MutVar s (PhiloxData n w))
 
