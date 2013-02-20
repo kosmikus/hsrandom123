@@ -52,5 +52,5 @@ benchmark hsrandom123-bench
                       primitive
   -- ghc-options:        -O2
   ghc-options:        -Wall
-  ghc-options:        -fsimpl-tick-factor=130
+  ghc-options:        -fsimpl-tick-factor=150
   -- ghc-options:        -Odph -fno-liberate-case -funfolding-use-threshold1000 -funfolding-keeness-factor1000

@@ -24,16 +24,16 @@ main = do
   mwc          <- MWC.create
   defaultMain [
       bgroup "Philox" [
-          bench "philox2x32" $ nfIO (P.uniform philox2x32)
-        , bench "philox4x32" $ nfIO (P.uniform philox4x32)
-        , bench "philox2x64" $ nfIO (P.uniform philox2x64)
-        , bench "philox4x64" $ nfIO (P.uniform philox4x64)
+          bench "philox2x32" $ nfIO (P.uniformDouble philox2x32)
+        , bench "philox4x32" $ nfIO (P.uniformDouble philox4x32)
+        , bench "philox2x64" $ nfIO (P.uniformDouble philox2x64)
+        , bench "philox4x64" $ nfIO (P.uniformDouble philox4x64)
       ]
     , bgroup "Philox via Word32" [
-          bench "philox2x32W" $ nfIO (P.uniformWord32 philox2x32W)
-        , bench "philox4x32W" $ nfIO (P.uniformWord32 philox4x32W)
-        , bench "philox2x64W" $ nfIO (P.uniformWord32 philox2x64W)
-        , bench "philox4x64W" $ nfIO (P.uniformWord32 philox4x64W)
+          bench "philox2x32W" $ nfIO (P.uniform philox2x32W :: IO Double)
+        , bench "philox4x32W" $ nfIO (P.uniform philox4x32W :: IO Double)
+        , bench "philox2x64W" $ nfIO (P.uniform philox2x64W :: IO Double)
+        , bench "philox4x64W" $ nfIO (P.uniform philox4x64W :: IO Double)
       ]
     , bgroup "Threefry" [
           bench "threefry2x32" $ nfIO (T.uniform threefry2x32)
@@ -46,10 +46,18 @@ main = do
         , bench "philox4x32" $ nf (take 1000 . P.ustream zero) (zero :: A N2 W32)
         , bench "philox2x64" $ nf (take 1000 . P.ustream zero) (zero :: A N1 W64)
         , bench "philox4x64" $ nf (take 1000 . P.ustream zero) (zero :: A N2 W64)
-        , bench "4x32 stream" $ nfIO (replicateM 1000 (P.uniform philox4x32))
-        , bench "4x64 stream" $ nfIO (replicateM 1000 (P.uniform philox4x64))
-        , bench "4x32 word stream" $ nfIO (replicateM 1000 (P.uniformWord32 philox4x32W))
-        , bench "4x64 word stream" $ nfIO (replicateM 1000 (P.uniformWord32 philox4x64W))
+        , bench "2x32 stream" $ nfIO (replicateM 1000 (P.uniformDouble philox2x32))
+        , bench "4x32 stream" $ nfIO (replicateM 1000 (P.uniformDouble philox4x32))
+        , bench "2x64 stream" $ nfIO (replicateM 1000 (P.uniformDouble philox2x64))
+        , bench "4x64 stream" $ nfIO (replicateM 1000 (P.uniformDouble philox4x64))
+        , bench "2x32 word stream" $ nfIO (replicateM 1000 (P.uniform philox2x32W :: IO Double))
+        , bench "4x32 word stream" $ nfIO (replicateM 1000 (P.uniform philox4x32W :: IO Double))
+        , bench "2x64 word stream" $ nfIO (replicateM 1000 (P.uniform philox2x64W :: IO Double))
+        , bench "4x64 word stream" $ nfIO (replicateM 1000 (P.uniform philox4x64W :: IO Double))
+        , bench "2x32 word int stream" $ nfIO (replicateM 1000 (P.uniform philox2x32W :: IO Int))
+        , bench "4x32 word int stream" $ nfIO (replicateM 1000 (P.uniform philox4x32W :: IO Int))
+        , bench "2x64 word int stream" $ nfIO (replicateM 1000 (P.uniform philox2x64W :: IO Int))
+        , bench "4x64 word int stream" $ nfIO (replicateM 1000 (P.uniform philox4x64W :: IO Int))
       ]
     , bgroup "Threefry stream" [
           bench "threefry2x32" $ nf (take 1000 . T.ustream zero) (zero :: A N2 W32)
@@ -58,7 +66,9 @@ main = do
         , bench "threefry4x64" $ nf (take 1000 . T.ustream zero) (zero :: A N4 W64)
       ]
     , bgroup "MWC" [
-          bench "mwc"        $ nfIO (MWC.uniform mwc :: IO Double)
-        , bench "mwc stream" $ nfIO (replicateM 1000 (MWC.uniform mwc) :: IO [Double])
+          bench "mwc"            $ nfIO (MWC.uniform mwc :: IO Double)
+        , bench "mwc int"        $ nfIO (MWC.uniform mwc :: IO Int)
+        , bench "mwc stream"     $ nfIO (replicateM 1000 (MWC.uniform mwc) :: IO [Double])
+        , bench "mwc int stream" $ nfIO (replicateM 1000 (MWC.uniform mwc) :: IO [Int])
       ]
     ]

@@ -443,3 +443,20 @@ wordsToDouble x y  = (fromIntegral u * m_inv_32 + (0.5 + m_inv_53) +
 wordToDouble :: Word64 -> Double
 wordToDouble w = wordsToDouble (fromIntegral w) (fromIntegral (shiftR w 32))
 {-# INLINE wordToDouble #-}
+
+wordsTo64Bit :: (Integral a) => Word32 -> Word32 -> a
+wordsTo64Bit x y =
+    fromIntegral ((fromIntegral x `shiftL` 32) .|. fromIntegral y :: Word64)
+{-# INLINE wordsTo64Bit #-}
+
+wordToBool :: Word32 -> Bool
+wordToBool i = (i .&. 1) /= 0
+{-# INLINE wordToBool #-}
+
+wordToFloat :: Word32 -> Float
+wordToFloat x      = (fromIntegral i * m_inv_32) + 0.5 + m_inv_33
+    where m_inv_33 = 1.16415321826934814453125e-10
+          m_inv_32 = 2.3283064365386962890625e-10
+          i        = fromIntegral x :: Int32
+{-# INLINE wordToFloat #-}
+

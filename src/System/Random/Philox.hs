@@ -16,6 +16,7 @@ module System.Random.Philox (
 import Control.Monad.Primitive
 import Control.Monad.ST
 import Data.Bits
+import Data.Int
 import Data.Primitive.MutVar
 import Data.Word
 import GHC.Exts
@@ -26,7 +27,7 @@ import System.Random.HsRandom123.Utils
 class PhiloxW w where
   mulhilo :: W w -> W w -> A N2 w
 
-#if WORD_SIZE_IN_BITS == 32
+#if WORD_SIZE_IN_BITS < 64
 #if MIN_VERSION_base(4,6,0)
 
 instance PhiloxW W32 where
@@ -283,8 +284,8 @@ new ctr key = do
   ph  <- newMutVar (init ctr key)
   return (PS svd ph)
 
-uniform :: (PrimMonad m, Philox n w) => PhiloxState (PrimState m) n w -> m Double
-uniform (PS svd ph) = do
+uniformDouble :: (PrimMonad m, Philox n w) => PhiloxState (PrimState m) n w -> m Double
+uniformDouble (PS svd ph) = do
   ds <- readMutVar svd
   case ds of
     (DoubleCons x xs) -> do
@@ -296,7 +297,7 @@ uniform (PS svd ph) = do
                     writeMutVar ph $! inc rng
                     writeMutVar svd rs
                     return r
-{-# INLINE uniform #-}
+{-# INLINE uniformDouble #-}
 
 data PhiloxStateWord32 s n w = PSW {-# UNPACK #-} !(MutVar s Word32List) {-# UNPACK #-} !(MutVar s (PhiloxData n w))
 
@@ -309,19 +310,33 @@ newWord32 ctr key = do
   ph  <- newMutVar (init ctr key)
   return (PSW svd ph)
 
-uniformWord32 :: (PrimMonad m, Philox n w) => PhiloxStateWord32 (PrimState m) n w -> m Double
-uniformWord32 (PSW svd ph) = do
+uniform1 :: (PrimMonad m, Philox n w) => (Word32 -> a) -> PhiloxStateWord32 (PrimState m) n w -> m a
+uniform1 f (PSW svd ph) = do
+  ds <- readMutVar svd
+  case ds of
+    (Word32Cons x xs) -> do
+                writeMutVar svd xs
+                return (f x)
+    Word32Nil -> do
+                rng <- readMutVar ph
+                toWord32sL (get rng) $ \ x xs -> do
+                  writeMutVar ph $! inc rng
+                  writeMutVar svd xs
+                  return (f x)
+
+uniform2 :: (PrimMonad m, Philox n w) => (Word32 -> Word32 -> a) -> PhiloxStateWord32 (PrimState m) n w -> m a
+uniform2 f (PSW svd ph) = do
   ds <- readMutVar svd
   case ds of
     (Word32Cons x0 (Word32Cons x1 xs)) -> do
                 writeMutVar svd xs
-                return (wordsToDouble x0 x1)
+                return (f x0 x1)
     (Word32Cons x0 Word32Nil) -> do
                 rng <- readMutVar ph
                 toWord32sL (get rng) $ \ x1 xs -> do
                     writeMutVar ph $! inc rng
                     writeMutVar svd xs
-                    return (wordsToDouble x0 x1)
+                    return (f x0 x1)
     Word32Nil -> do
                 rng <- readMutVar ph
                 toWord32sL (get rng) $ \ x0 xs ->
@@ -329,14 +344,69 @@ uniformWord32 (PSW svd ph) = do
                     (Word32Cons x1 ys) -> do
                       writeMutVar ph $! inc rng
                       writeMutVar svd ys
-                      return (wordsToDouble x0 x1)
+                      return (f x0 x1)
                     Word32Nil -> do
                       let !rng' = inc rng
                       toWord32sL (get rng') $ \ x1 ys -> do
                         writeMutVar ph $! inc rng'
                         writeMutVar svd ys
-                        return (wordsToDouble x0 x1)
-{-# INLINE uniformWord32 #-}
+                        return (f x0 x1)
+{-# INLINE uniform2 #-}
+
+class Variate a where
+  uniform :: (Philox n w, PrimMonad m) => PhiloxStateWord32 (PrimState m) n w -> m a
+
+instance Variate Int8 where
+  uniform = uniform1 fromIntegral
+  {-# INLINE uniform #-}
+
+instance Variate Int16 where
+  uniform = uniform1 fromIntegral
+  {-# INLINE uniform #-}
+
+instance Variate Int32 where
+  uniform = uniform1 fromIntegral
+  {-# INLINE uniform #-}
+
+instance Variate Int64 where
+  uniform = uniform2 wordsTo64Bit
+  {-# INLINE uniform #-}
+
+instance Variate Word8 where
+  uniform = uniform1 fromIntegral
+  {-# INLINE uniform #-}
+
+instance Variate Word16 where
+  uniform = uniform1 fromIntegral
+  {-# INLINE uniform #-}
+
+instance Variate Word32 where
+  uniform = uniform1 fromIntegral
+  {-# INLINE uniform #-}
+
+instance Variate Word64 where
+  uniform = uniform2 wordsTo64Bit
+  {-# INLINE uniform #-}
+
+instance Variate Double where
+  uniform = uniform2 wordsToDouble
+  {-# INLINE uniform #-}
+
+instance Variate Int where
+#if WORD_SIZE_IN_BITS < 64
+  uniform = uniform1 fromIntegral
+#else
+  uniform = uniform2 wordsTo64Bit
+#endif
+  {-# INLINE uniform  #-}
+
+instance Variate Word where
+#if WORD_SIZE_IN_BITS < 64
+  uniform = uniform1 fromIntegral
+#else
+  uniform = uniform2 wordsTo64Bit
+#endif
+  {-# INLINE uniform  #-}
 
 newtype PhiloxStateRaw s n w = PSR (MutVar s (PhiloxData n w))
 
